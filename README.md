@@ -3,6 +3,9 @@
 Простой веб-интерфейс для отправки и получения текстовых сообщений в MAX через [GREEN-API](https://green-api.com/max).
 Тестовое задание на позицию «Фронтенд разработчик React».
 
+- Демо: https://chatbridge-eta.vercel.app
+- Репозиторий: https://github.com/roovwhite/chatbridge
+
 ## Возможности
 
 - Вход по данным инстанса GREEN-API (`idInstance`, `apiTokenInstance`) с проверкой через `getStateInstance`
@@ -31,7 +34,7 @@ React 19, TypeScript, Vite, Zustand (состояние и сохранение 
 Нужен Node.js 20+ (проверялось на Node 24).
 
 ```bash
-git clone <ссылка на репозиторий>
+git clone https://github.com/roovwhite/chatbridge.git
 cd chatbridge
 npm install
 npm run dev
