@@ -4,18 +4,18 @@ import type { IncomingEvent, InstanceState, RawNotification } from './types'
 // сколько сервер держит запрос в ожидании уведомления; таймаут клиента должен быть больше
 const RECEIVE_TIMEOUT_S = 20
 
-// Телефон (10-15 цифр) -> "79991234567@c.us". Готовые id ("...@c.us" или короткий
-// числовой chatId MAX) возвращаются как есть. Если ввод некорректный, вернёт null.
+// Телефон (10-15 цифр, можно с «+», пробелами и скобками) -> "79991234567@c.us".
+// Готовый chatId вида "...@c.us" или "...@g.us" возвращается как есть.
+// Если ввод некорректный, вернёт null.
 export function normalizeChatId(input: string): string | null {
   const trimmed = input.trim()
-  if (/^\d+@c\.us$/.test(trimmed)) return trimmed
+  if (/^\d+@[cg]\.us$/.test(trimmed)) return trimmed
   const digits = trimmed.replace(/\D/g, '')
   if (digits.length >= 10 && digits.length <= 15) return `${digits}@c.us`
-  if (/^\d{1,9}$/.test(digits) && digits === trimmed) return digits
   return null
 }
 
-export function createMaxApi(client: ApiClient) {
+export function createWhatsAppApi(client: ApiClient) {
   return {
     async getState(opts?: RequestOptions): Promise<InstanceState> {
       const res = await client.get<{ stateInstance: InstanceState }>('getStateInstance', opts)
@@ -36,10 +36,17 @@ export function createMaxApi(client: ApiClient) {
       if (!raw) return null
 
       const { receiptId, body } = raw
-      const text = body.messageData?.textMessageData?.textMessage
+      const data = body.messageData
+      // обычный текст приходит как textMessage, текст со ссылкой или ответом как extendedTextMessage
+      const text =
+        data?.typeMessage === 'textMessage'
+          ? data.textMessageData?.textMessage
+          : data?.typeMessage === 'extendedTextMessage'
+            ? data.extendedTextMessageData?.text
+            : undefined
+
       if (
         body.typeWebhook === 'incomingMessageReceived' &&
-        body.messageData?.typeMessage === 'textMessage' &&
         body.senderData &&
         body.idMessage &&
         text !== undefined
@@ -50,8 +57,7 @@ export function createMaxApi(client: ApiClient) {
           kind: 'message',
           message: {
             chatId: s.chatId,
-            chatName: s.chatName || s.senderName || s.chatId,
-            senderPhone: s.senderPhoneNumber ? String(s.senderPhoneNumber) : undefined,
+            chatName: s.senderContactName || s.chatName || s.senderName || s.chatId.split('@')[0],
             idMessage: body.idMessage,
             text,
             timestamp: (body.timestamp ?? Math.floor(Date.now() / 1000)) * 1000,
@@ -61,6 +67,7 @@ export function createMaxApi(client: ApiClient) {
       return { receiptId, kind: 'ignored' }
     },
 
+    // receiptId передаётся в пути после токена, метод DELETE
     async ack(receiptId: number, signal?: AbortSignal): Promise<void> {
       const res = await client.delete<{ result: boolean; reason?: string }>('deleteNotification', {
         signal,
@@ -71,4 +78,4 @@ export function createMaxApi(client: ApiClient) {
   }
 }
 
-export type MaxApi = ReturnType<typeof createMaxApi>
+export type WhatsAppApi = ReturnType<typeof createWhatsAppApi>

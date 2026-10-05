@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { createClient } from '../api/client'
-import { createMaxApi } from '../api/max'
+import { createWhatsAppApi } from '../api/whatsapp'
 import { useChatStore } from '../store/chatStore'
 
 // Отправка текста: сообщение сразу появляется в чате (pending), потом получает sent или failed.
@@ -10,7 +10,7 @@ export function useSendMessage() {
     if (!account) return
     updateMessage(chatId, localId, { status: 'pending' })
     try {
-      const idMessage = await createMaxApi(createClient(account)).sendText(chatId, text)
+      const idMessage = await createWhatsAppApi(createClient(account)).sendText(chatId, text)
       // заменяем локальный id настоящим, чтобы не путаться с сообщениями из API
       updateMessage(chatId, localId, { id: idMessage, status: 'sent' })
     } catch {

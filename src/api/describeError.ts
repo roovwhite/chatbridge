@@ -10,7 +10,7 @@ export function describeError(e: unknown): string {
     case 'quota':
       return 'Исчерпана квота тарифа GREEN-API'
     case 'rate_limit':
-      return 'Слишком много запросов, повторите чуть позже'
+      return 'Слишком много запросов или достигнут лимит тарифа Developer'
     case 'network':
       return 'Нет соединения с GREEN-API'
     case 'timeout':
@@ -20,7 +20,8 @@ export function describeError(e: unknown): string {
     case 'parse':
       return 'Некорректный ответ сервера'
     case 'client':
-      return typeof e.body === 'string' && e.body.includes('custom webhook url')
+      // тело ошибки приходит как JSON ({ code, message, status }) или как текст
+      return JSON.stringify(e.body ?? '').includes('custom webhook url')
         ? 'У инстанса задан webhookUrl, очистите его в настройках'
         : `Ошибка запроса (${e.status ?? '?'})`
     default:
@@ -31,15 +32,16 @@ export function describeError(e: unknown): string {
 export function describeState(state: InstanceState): string {
   switch (state) {
     case 'notAuthorized':
-      return 'Инстанс не авторизован: войдите в MAX через личный кабинет GREEN-API'
+      return 'Инстанс не авторизован: отсканируйте QR-код WhatsApp в личном кабинете GREEN-API'
     case 'blocked':
-      return 'Аккаунт MAX заблокирован'
+      return 'Аккаунт WhatsApp заблокирован'
     case 'starting':
       return 'Инстанс запускается, попробуйте через несколько минут'
-    case 'pendingPassword':
-      return 'Инстанс ждёт пароль двухфакторной авторизации'
+    case 'sleepMode':
+      return 'Телефон с WhatsApp не в сети'
     case 'suspended':
-      return 'Отправка ограничена: сообщения доступны только сохранённым контактам'
+    case 'yellowCard':
+      return 'На инстансе действуют временные ограничения отправки'
     default:
       return state
   }

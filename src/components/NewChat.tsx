@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { normalizeChatId } from '../api/max'
+import { normalizeChatId } from '../api/whatsapp'
 import { useChatStore } from '../store/chatStore'
 import styles from './NewChat.module.css'
 

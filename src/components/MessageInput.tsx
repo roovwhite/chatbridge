@@ -2,7 +2,7 @@ import { useState, type KeyboardEvent } from 'react'
 import styles from './MessageInput.module.css'
 
 // лимит текста одного сообщения в GREEN-API
-const MAX_LENGTH = 4000
+const MAX_LENGTH = 20000
 
 export function MessageInput({ onSend }: { onSend: (text: string) => void }) {
   const [text, setText] = useState('')

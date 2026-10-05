@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createClient } from '../api/client'
 import { describeError, describeState } from '../api/describeError'
-import { createMaxApi } from '../api/max'
+import { createWhatsAppApi } from '../api/whatsapp'
 import { useChatStore } from '../store/chatStore'
 import styles from './LoginForm.module.css'
 
@@ -30,8 +30,9 @@ export function LoginForm() {
     setError(null)
     try {
       // проверяем креды лёгким запросом, а не при первой отправке сообщения
-      const state = await createMaxApi(createClient(account)).getState()
-      if (state === 'authorized' || state === 'suspended') login(account)
+      const state = await createWhatsAppApi(createClient(account)).getState()
+      // suspended и yellowCard: отправка ограничена, но войти и получать сообщения можно
+      if (state === 'authorized' || state === 'suspended' || state === 'yellowCard') login(account)
       else setError(describeState(state))
     } catch (err) {
       setError(describeError(err))

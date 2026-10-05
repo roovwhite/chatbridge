@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApiError, createClient } from '../api/client'
-import { createMaxApi } from '../api/max'
+import { createWhatsAppApi } from '../api/whatsapp'
 import { useChatStore } from '../store/chatStore'
 
 const BASE_DELAY_MS = 1_000
@@ -40,7 +40,7 @@ export function useReceiver(): ApiError | null {
 
     const ctrl = new AbortController()
     const { signal } = ctrl
-    const api = createMaxApi(createClient({ apiUrl, idInstance, apiTokenInstance }))
+    const api = createWhatsAppApi(createClient({ apiUrl, idInstance, apiTokenInstance }))
     const { receiveMessage } = useChatStore.getState()
 
     async function loop() {

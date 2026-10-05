@@ -8,8 +8,6 @@ interface ChatState {
   chats: Record<string, Chat>
   messages: Record<string, ChatMessage[]>
   unread: Record<string, number>
-  // числовой chatId MAX -> id чата, созданного по номеру телефона (79991234567@c.us)
-  aliases: Record<string, string>
   activeChatId: string | null
 
   login: (account: Account) => void
@@ -23,8 +21,8 @@ interface ChatState {
   receiveMessage: (msg: IncomingMessage) => void
 }
 
-// «79991234567@c.us» -> «79991234567», для числового chatId возвращает undefined
-const phoneOf = (chatId: string) => chatId.match(/^(\d+)@c\.us$/)?.[1]
+// «79991234567@c.us» -> «79991234567»; имя чата по умолчанию, пока нет имени контакта
+const phoneOf = (chatId: string) => chatId.split('@')[0]
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -33,20 +31,18 @@ export const useChatStore = create<ChatState>()(
       chats: {},
       messages: {},
       unread: {},
-      aliases: {},
       activeChatId: null,
 
       login: (account) => set({ account }),
 
       // креды и вся локальная история удаляются вместе, чтобы не смешивать разные инстансы
-      logout: () =>
-        set({ account: null, chats: {}, messages: {}, unread: {}, aliases: {}, activeChatId: null }),
+      logout: () => set({ account: null, chats: {}, messages: {}, unread: {}, activeChatId: null }),
 
       openChat: (chatId) =>
         set((s) => ({
           chats: s.chats[chatId]
             ? s.chats
-            : { ...s.chats, [chatId]: { id: chatId, name: phoneOf(chatId) ?? chatId, phone: phoneOf(chatId) } },
+            : { ...s.chats, [chatId]: { id: chatId, name: phoneOf(chatId) } },
           activeChatId: chatId,
           unread: { ...s.unread, [chatId]: 0 },
         })),
@@ -84,25 +80,18 @@ export const useChatStore = create<ChatState>()(
       receiveMessage: (msg) => {
         const s = get()
 
-        // определяем «родной» id чата: известный алиас, чат с таким же телефоном или сам chatId
-        let chatId = s.aliases[msg.chatId] ?? msg.chatId
-        let aliases = s.aliases
-        if (!s.chats[chatId] && msg.senderPhone) {
-          const byPhone = Object.values(s.chats).find((c) => c.phone === msg.senderPhone)
-          if (byPhone) {
-            chatId = byPhone.id
-            aliases = { ...aliases, [msg.chatId]: chatId }
-          }
-        }
+        // в WhatsApp chatId входящих совпадает с chatId, на который мы отправляли (79991234567@c.us)
+        const chatId = msg.chatId
 
         // повторная доставка того же уведомления (например, не дошёл deleteNotification)
         if (s.messages[chatId]?.some((m) => m.id === msg.idMessage)) return
 
-        const chat: Chat = s.chats[chatId] ?? {
-          id: chatId,
-          name: msg.chatName,
-          phone: msg.senderPhone,
-        }
+        const existing = s.chats[chatId]
+        // чат, созданный по номеру, получает имя контакта, когда оно становится известно
+        const chat: Chat =
+          existing && existing.name !== phoneOf(chatId)
+            ? existing
+            : { id: chatId, name: msg.chatName }
         const message: ChatMessage = {
           id: msg.idMessage,
           chatId,
@@ -112,7 +101,6 @@ export const useChatStore = create<ChatState>()(
           status: 'sent',
         }
         set({
-          aliases,
           chats: { ...s.chats, [chatId]: chat },
           messages: { ...s.messages, [chatId]: [...(s.messages[chatId] ?? []), message] },
           unread:
@@ -131,7 +119,6 @@ export const useChatStore = create<ChatState>()(
         chats: s.chats,
         messages: s.messages,
         unread: s.unread,
-        aliases: s.aliases,
         activeChatId: s.activeChatId,
       }),
     },

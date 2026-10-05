@@ -4,7 +4,8 @@ export type InstanceState =
   | 'blocked'
   | 'starting'
   | 'suspended'
-  | 'pendingPassword'
+  | 'sleepMode' // устаревший статус: телефон офлайн
+  | 'yellowCard' // устаревший статус, заменён на suspended
 
 export type MessageStatus = 'pending' | 'sent' | 'failed'
 
@@ -20,15 +21,11 @@ export interface ChatMessage {
 export interface Chat {
   id: string
   name: string
-  // телефон хранится, чтобы связать исходящий чат (79991234567@c.us)
-  // с числовым chatId, который MAX присылает во входящих уведомлениях
-  phone?: string
 }
 
 export interface IncomingMessage {
   chatId: string
   chatName: string
-  senderPhone?: string
   idMessage: string
   text: string
   timestamp: number // ms
@@ -50,11 +47,12 @@ export interface RawNotification {
       chatId: string
       chatName?: string
       senderName?: string
-      senderPhoneNumber?: number
+      senderContactName?: string
     }
     messageData?: {
       typeMessage: string
       textMessageData?: { textMessage: string }
+      extendedTextMessageData?: { text: string }
     }
   }
 }
