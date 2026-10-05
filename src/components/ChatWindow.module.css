@@ -1,0 +1,91 @@
+.window {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--chat-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface);
+}
+
+.back {
+  display: none;
+  padding: 0 8px;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.row.out {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: min(75%, 560px);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bubble-in);
+  border-radius: 18px;
+}
+
+.bubbleOut {
+  color: #fff;
+  background: var(--bubble-out);
+}
+
+.text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  flex-shrink: 0;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.retry {
+  padding: 0;
+  color: var(--danger);
+  font-size: 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .back {
+    display: block;
+  }
+}

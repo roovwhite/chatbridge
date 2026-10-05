@@ -1,0 +1,38 @@
+.layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  padding: 8px 16px;
+  color: #fff;
+  background: var(--danger);
+  font-size: 14px;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: var(--chat-bg);
+}
+
+@media (max-width: 720px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  /* при открытом чате скрываем список, при закрытом скрываем заглушку */
+  .chatOpen > aside,
+  .body:not(.chatOpen) > .placeholder {
+    display: none;
+  }
+}
