@@ -1,0 +1,180 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px 20px;
+}
+
+.titleWrapper {
+  display: flex;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.subtitle {
+  background-color: #7ab6ff;
+  border-radius: 15px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: var(--surface);
+  text-align: center;
+  align-self: center;
+}
+
+.btnWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.logout {
+  padding: 6px 10px;
+  color: var(--text-muted);
+  background-color: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--white);
+  background-color: var(--green);
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.list {
+  flex: 1;
+  margin: 0;
+  padding: 4px 8px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+  margin-bottom: 4px;
+
+  &:last-child,
+  &:only-child {
+    margin-bottom: 0;
+  }
+}
+
+.item:hover {
+  background-color: var(--selected);
+}
+
+.item.active {
+  background-color: var(--selected);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* первая строка: имя слева, время справа */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.name {
+  min-width: 0;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* вторая строка: статус и текст сообщения слева, счётчик непрочитанных справа */
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+}
+
+.preview {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.previewText {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 1px 6px;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  background-color: var(--accent);
+  border-radius: 18px;
+}
+
+.empty {
+  padding: 24px 16px;
+  color: var(--text-muted);
+  text-align: center;
+}

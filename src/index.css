@@ -1,0 +1,43 @@
+/* светлая тема, палитра по скриншоту интерфейса мессенджера */
+:root {
+  --bg: #f2f3f5;
+  --surface: #ffffff;
+  --text: #1c1c1e;
+  --text-muted: #8e8e93;
+  --border: #e5e5ea;
+  --accent: #007bfc;
+  --danger: #ff3b30;
+  --selected: #f7f5f5;
+  --field: #f0f0f3;
+  --bubble-in: #ffffff;
+  --bubble-out: #d9fdd3;
+  --chat-bg: linear-gradient(180deg, #7ab6ff 0%, #9ad3dc 100%);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --bg-border: #c9c9c9;
+  --white: #fff;
+  --black: #000;
+  --green: #21c063;
+
+  color-scheme: light;
+  font-family: Roboto, -apple-system, system-ui, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: var(--accent);
+}

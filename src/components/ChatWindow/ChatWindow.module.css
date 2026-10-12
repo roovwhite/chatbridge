@@ -1,0 +1,112 @@
+.window {
+  position: relative;
+  /* свой контекст наложения, чтобы слой фона с z-index: -1 не ушёл под родителей */
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Фоновый узор вынесен в отдельный слой: mask действует на весь элемент вместе с потомками,
+   поэтому на самом .window она бы обрезала шапку, пузыри и поле ввода */
+.window::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #EAE0D3;
+  mask-image: url(./images/bg.svg);
+  mask-repeat: repeat;
+  mask-mode: alpha;
+  mask-size: 412px 749px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background-color: var(--surface);
+}
+
+.back {
+  display: none;
+  padding: 0 4px;
+  color: var(--text-muted);
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.row.out {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: min(75%, 560px);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 8px 12px;
+  background-color: var(--bubble-in);
+  border-radius: 18px 18px 18px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bubbleOut {
+  background-color: var(--bubble-out);
+  border-radius: 18px 18px 2px 18px;
+}
+
+.text {
+  font-size: 14px;
+  font-weight: 400;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.retry {
+  padding: 0;
+  color: var(--danger);
+  font-size: 12px;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .back {
+    display: block;
+  }
+}

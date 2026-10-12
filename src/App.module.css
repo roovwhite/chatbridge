@@ -1,0 +1,77 @@
+.layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  padding: 8px 16px;
+  color: #fff;
+  background-color: var(--danger);
+  font-size: 14px;
+}
+
+.warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  color: #5c4400;
+  background-color: #ffe9a8;
+  font-size: 14px;
+}
+
+.warning p {
+  margin: 0;
+}
+
+.warning p + p {
+  margin-top: 4px;
+}
+
+.warning .checked {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.recheck:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.recheck {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  color: inherit;
+  background-color: transparent;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: var(--chat-bg);
+}
+
+@media (max-width: 720px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  /* при открытом чате скрываем список, при закрытом скрываем заглушку */
+  .chatOpen > aside,
+  .body:not(.chatOpen) > .placeholder {
+    display: none;
+  }
+}

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>chatbridge</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#007aff"/>
+      <stop offset="1" stop-color="#21c063"/>
+    </linearGradient>
+  </defs>
+  <!-- фон -->
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <!-- пузырь чата -->
+  <path fill="#fff" d="M16 12h32a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H29l-9 8v-8h-4a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z"/>
+  <!-- мост: дуга и полотно -->
+  <path d="M15 37c6-13 28-13 34 0" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M13 37h38" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
+</svg>
