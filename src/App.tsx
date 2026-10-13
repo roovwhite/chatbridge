@@ -1,20 +1,17 @@
 import { describeError } from '@/api/describeError'
 import { ChatList } from '@/components/ChatList'
-import { ChatWindow } from '@/components/ChatWindow/ChatWindow.tsx'
+import { ChatWindow } from '@/components/ChatWindow/ChatWindow'
 import { LoginForm } from '@/components/LoginForm'
 import { useReceiver } from '@/hooks/useReceiver'
 import { useSettingsWarning } from '@/hooks/useSettingsWarning'
 import { useChatStore } from '@/store/chatStore'
+import { formatTime } from '@/utils/format'
 
 import styles from './App.module.css'
-
-const formatClock = (ts: number) =>
-  new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 
 export default function App() {
   const account = useChatStore((s) => s.account)
   const activeChatId = useChatStore((s) => s.activeChatId)
-  // хук сам ничего не делает, пока нет account
   const receiverError = useReceiver()
   const { warnings, failed, checkedAt, checking, cooldownLeftSec, recheck } = useSettingsWarning()
 
@@ -28,13 +25,12 @@ export default function App() {
             {warnings.map((w) => (
               <p key={w}>{w}</p>
             ))}
-            {/* без этого повторная проверка с тем же результатом выглядит как «ничего не произошло» */}
             {checkedAt && !checking && (
               <p className={styles.checked}>
                 {failed
                   ? 'Не удалось проверить (возможно, лимит запросов), попробуйте через минуту. '
                   : 'Настройки пока не изменились. '}
-                Проверено в {formatClock(checkedAt)}
+                Проверено в {formatTime(checkedAt, true)}
               </p>
             )}
           </div>

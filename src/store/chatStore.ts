@@ -4,6 +4,8 @@ import type { Chat, ChatMessage, IncomingMessage, MessageStatus } from '@/api/ty
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { phoneOf } from '@/api/whatsapp'
+
 interface ChatState {
   account: Account | null
   chats: Record<string, Chat>
@@ -26,9 +28,6 @@ interface ChatState {
 
 // порядок статусов доставки; уведомления могут приходить не по порядку
 const STATUS_RANK: Partial<Record<MessageStatus, number>> = { pending: 0, sent: 1, delivered: 2, read: 3 }
-
-// «79991234567@c.us» -> «79991234567»; имя чата по умолчанию, пока нет имени контакта
-const phoneOf = (chatId: string) => chatId.split('@')[0]
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -103,8 +102,7 @@ export const useChatStore = create<ChatState>()(
       receiveMessage: (msg) => {
         const s = get()
 
-        // в WhatsApp chatId входящих совпадает с chatId, на который мы отправляли (79991234567@c.us)
-        const chatId = msg.chatId
+        const { chatId } = msg
 
         // повторная доставка того же уведомления (например, не дошёл deleteNotification)
         if (s.messages[chatId]?.some((m) => m.id === msg.idMessage)) return
@@ -136,7 +134,6 @@ export const useChatStore = create<ChatState>()(
     {
       name: 'chatbridge',
       version: 1,
-      // сохраняем всё состояние, кроме функций
       partialize: (s) => ({
         account: s.account,
         chats: s.chats,

@@ -24,7 +24,9 @@ export function describeError(e: unknown): string {
       // тело ошибки приходит как JSON ({ code, message, status }) или как текст
       return JSON.stringify(e.body ?? '').includes('custom webhook url')
         ? 'У инстанса задан webhookUrl, очистите его в настройках'
-        : `Ошибка запроса (${e.status ?? '?'})`
+        : e.status
+          ? `Ошибка запроса (${e.status})`
+          : 'Что-то пошло не так'
     default:
       return 'Запрос отменён'
   }

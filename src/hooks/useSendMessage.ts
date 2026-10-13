@@ -27,8 +27,5 @@ export function useSendMessage() {
     [deliver],
   )
 
-  // повторная отправка по кнопке для сообщения со статусом failed
-  const retry = deliver
-
-  return { send, retry }
+  return { send, retry: deliver }
 }

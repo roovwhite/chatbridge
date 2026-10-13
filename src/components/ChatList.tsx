@@ -1,12 +1,12 @@
 import { Plus, X } from 'lucide-react'
 import { useState } from 'react'
 
-import { MessageTicks } from '@/components/MessageTicks'
 import { useChatStore } from '@/store/chatStore'
 import { formatTime } from '@/utils/format'
 
 import { Avatar } from './Avatar'
 import styles from './ChatList.module.css'
+import { MessageTicks } from './MessageTicks'
 import { NewChat } from './NewChat'
 
 export function ChatList() {

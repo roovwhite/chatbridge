@@ -6,21 +6,8 @@ import { useEffect, useState } from 'react'
 import { getWhatsAppApi } from '@/api/instance'
 import { useChatStore } from '@/store/chatStore'
 
-// getSettings у GREEN-API ограничен по частоте (429): автоматическая проверка при загрузке
-// кэшируется на минуту. Ручная («Проверить снова») всегда делает реальный запрос,
-// но параллельные запросы схлопываются в один.
-const AUTO_MAX_AGE_MS = 60_000
-// после проверки повторная ручная недоступна, пока не пройдёт это время
+// после проверки повторная ручная недоступна, пока не пройдёт это время (getSettings лимитирован, 429)
 const RECHECK_COOLDOWN_MS = 10_000
-
-interface CacheEntry {
-  key: string
-  at: number
-  pending: boolean
-  promise: Promise<string[] | null>
-}
-
-let cache: CacheEntry | null = null
 
 function describeProblems(settings: InstanceSettings): string[] {
   const found: string[] = []
@@ -57,20 +44,29 @@ function describeProblems(settings: InstanceSettings): string[] {
 }
 
 // null означает, что настройки узнать не удалось (сеть, лимит запросов)
-function loadWarnings(api: WhatsAppApi, key: string, maxAgeMs: number): Promise<string[] | null> {
-  if (cache && cache.key === key && (cache.pending || Date.now() - cache.at < maxAgeMs)) {
-    return cache.promise
-  }
-  const entry: CacheEntry = { key, at: Date.now(), pending: true, promise: Promise.resolve(null) }
-  entry.promise = api
+// Параллельные проверки (двойной запуск эффекта в StrictMode) делят один запрос.
+let inflight: { key: string; promise: Promise<string[] | null> } | null = null
+
+function loadWarnings(api: WhatsAppApi, key: string): Promise<string[] | null> {
+  if (inflight?.key === key) return inflight.promise
+  const promise = api
     .getSettings()
     .then(describeProblems)
     .catch(() => null)
     .finally(() => {
-      entry.pending = false
+      inflight = null
     })
-  cache = entry
-  return entry.promise
+  inflight = { key, promise }
+  return promise
+}
+
+interface CheckResult {
+  key: string
+  // номер запрошенной проверки: 0 автоматическая, дальше по кнопке «Проверить снова»
+  attempt: number
+  warnings: string[]
+  failed: boolean
+  checkedAt: number
 }
 
 // Проверяет настройки инстанса и возвращает список проблем, из-за которых
@@ -79,37 +75,39 @@ export function useSettingsWarning() {
   const apiUrl = useChatStore((s) => s.account?.apiUrl)
   const idInstance = useChatStore((s) => s.account?.idInstance)
   const apiTokenInstance = useChatStore((s) => s.account?.apiTokenInstance)
-  const [warnings, setWarnings] = useState<string[]>([])
-  const [failed, setFailed] = useState(false)
-  const [checkedAt, setCheckedAt] = useState<number | null>(null)
-  // номер запрошенной проверки: 0 автоматическая, дальше по кнопке «Проверить снова»
+  const [result, setResult] = useState<CheckResult | null>(null)
   const [attempt, setAttempt] = useState(0)
-  // номер последней завершённой; пока он отличается от attempt, проверка идёт
-  const [doneAttempt, setDoneAttempt] = useState(-1)
+  const [now, setNow] = useState(() => Date.now())
+  const key = `${apiUrl}|${idInstance}|${apiTokenInstance}`
 
   useEffect(() => {
     if (!apiUrl || !idInstance || !apiTokenInstance) return
     let cancelled = false
     const api = getWhatsAppApi({ apiUrl, idInstance, apiTokenInstance })
-    const key = `${apiUrl}|${idInstance}`
 
-    loadWarnings(api, key, attempt > 0 ? 0 : AUTO_MAX_AGE_MS).then((found) => {
+    loadWarnings(api, key).then((found) => {
       if (cancelled) return
-      setFailed(found === null)
-      if (found) setWarnings(found)
-      setCheckedAt(Date.now())
-      setDoneAttempt(attempt)
+      const checkedAt = Date.now()
+      setNow(checkedAt)
+      // при неудачной проверке оставляем прошлые предупреждения: они могли устареть, но лучше, чем ничего
+      setResult((prev) => ({
+        key,
+        attempt,
+        checkedAt,
+        failed: found === null,
+        warnings: found ?? (prev?.key === key ? prev.warnings : []),
+      }))
     })
 
     return () => {
       cancelled = true
     }
-  }, [apiUrl, idInstance, apiTokenInstance, attempt])
+  }, [apiUrl, idInstance, apiTokenInstance, key, attempt])
 
-  // текущее время для обратного отсчёта; тикает, только пока действует ограничение
-  const [now, setNow] = useState(() => Date.now())
-  const cooldownEndsAt = checkedAt === null ? 0 : checkedAt + RECHECK_COOLDOWN_MS
+  const current = result?.key === key ? result : null
+  const cooldownEndsAt = current ? current.checkedAt + RECHECK_COOLDOWN_MS : 0
 
+  // обратный отсчёт тикает, только пока действует ограничение
   useEffect(() => {
     if (cooldownEndsAt <= Date.now()) return
     const timer = setInterval(() => {
@@ -120,23 +118,18 @@ export function useSettingsWarning() {
     return () => clearInterval(timer)
   }, [cooldownEndsAt])
 
-  const checking = doneAttempt !== attempt
-  // верхний предел нужен, пока now не обновился после завершения проверки (иначе мелькнёт лишнее)
-  const cooldownLeftSec = Math.min(
-    Math.ceil(RECHECK_COOLDOWN_MS / 1000),
-    Math.max(0, Math.ceil((cooldownEndsAt - now) / 1000)),
-  )
+  const checking = current?.attempt !== attempt
+  const cooldownLeftSec = Math.max(0, Math.ceil((cooldownEndsAt - now) / 1000))
 
   return {
-    warnings,
+    warnings: current?.warnings ?? [],
     // последняя проверка не удалась (чаще всего 429), показанные предупреждения могли устареть
-    failed,
-    checkedAt,
+    failed: current?.failed ?? false,
+    checkedAt: current?.checkedAt ?? null,
     checking,
     // сколько секунд осталось до возможности повторить проверку; 0, если можно
     cooldownLeftSec,
     recheck: () => {
-      // повторное нажатие до окончания паузы или во время проверки ничего не делает
       if (checking || cooldownLeftSec > 0) return
       setAttempt((n) => n + 1)
     },

@@ -23,10 +23,7 @@ export default defineConfig([
       'simple-import-sort': simpleImportSort,
     },
     rules: {
-      // Порядок импортов; группы разделяются пустой строкой:
-      // 1) import type  2) внешние пакеты  3) алиас @/  4) относительные (стили, соседние файлы).
-      // Побочные импорты (import 'x') стоят в своей группе по источнику.
-      // Исправляется автоматически: npm run lint -- --fix
+      // группы импортов через пустую строку: типы, пакеты, алиас @/, относительные
       'simple-import-sort/imports': [
         'error',
         {
@@ -44,8 +41,6 @@ export default defineConfig([
       ],
       'simple-import-sort/exports': 'error',
 
-      // Типы импортируются отдельной инструкцией: import type { A } from 'x'.
-      // Так при verbatimModuleSyntax импорт стирается целиком, а не остаётся побочным import 'x'.
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports', fixStyle: 'separate-type-imports' },

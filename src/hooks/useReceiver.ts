@@ -26,10 +26,8 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
   })
 }
 
-/**
- * Polling входящих сообщений: receiveNotification -> сохранить в store -> deleteNotification.
- * Возвращает последнюю ошибку; при неповторяемых ошибках (auth, quota и т.п.) цикл останавливается.
- */
+// Polling входящих сообщений: receiveNotification -> сохранить в store -> deleteNotification.
+// Возвращает последнюю ошибку; при неповторяемых ошибках (auth, quota и т.п.) цикл останавливается.
 export function useReceiver(): ApiError | null {
   const account = useChatStore((s) => s.account)
   const [error, setError] = useState<ApiError | null>(null)
@@ -73,14 +71,19 @@ export function useReceiver(): ApiError | null {
           } catch (e) {
             if (signal.aborted) return
             // сообщение уже в store, поэтому сбой ack не останавливает цикл
-            console.warn('deleteNotification не удался', e)
+            console.warn('deleteNotification failed', e)
           }
         } catch (e) {
           if (signal.aborted) return
-          const err = e instanceof ApiError ? e : new ApiError('network', 'Неизвестная ошибка')
-          if (err.kind === 'aborted') return
-          setError(err)
-          if (!err.retryable) return
+          if (!(e instanceof ApiError)) {
+            // сбой в нашем коде, а не запроса: повтор не поможет, поэтому останавливаем цикл
+            console.error(e)
+            setError(new ApiError('client', 'Unexpected error'))
+            return
+          }
+          if (e.kind === 'aborted') return
+          setError(e)
+          if (!e.retryable) return
           await sleep(delay, signal)
           delay = Math.min(delay * 2, MAX_DELAY_MS)
         }

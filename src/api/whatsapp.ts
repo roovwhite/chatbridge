@@ -8,19 +8,11 @@ import { ApiError } from './client'
 // и цикл получения превращается в поток запросов без пауз.
 const RECEIVE_TIMEOUT_S = 20
 
-// Телефон (10-15 цифр, можно с «+», пробелами и скобками) -> "79991234567@c.us".
-// Готовый chatId вида "...@c.us" или "...@g.us" возвращается как есть.
-// Если ввод некорректный, вернёт null.
-// цифры номера в международном формате -> "79991234567@c.us"
+// цифры номера в международном формате -> «79991234567@c.us»
 export const phoneToChatId = (digits: string) => `${digits}@c.us`
 
-export function normalizeChatId(input: string): string | null {
-  const trimmed = input.trim()
-  if (/^\d+@[cg]\.us$/.test(trimmed)) return trimmed
-  const digits = trimmed.replace(/\D/g, '')
-  if (digits.length >= 10 && digits.length <= 15) return phoneToChatId(digits)
-  return null
-}
+// «79991234567@c.us» -> «79991234567»
+export const phoneOf = (chatId: string) => chatId.split('@')[0]
 
 export function createWhatsAppApi(client: ApiClient) {
   return {
@@ -98,7 +90,7 @@ export function createWhatsAppApi(client: ApiClient) {
           kind: 'message',
           message: {
             chatId: s.chatId,
-            chatName: s.senderContactName || s.chatName || s.senderName || s.chatId.split('@')[0],
+            chatName: s.senderContactName || s.chatName || s.senderName || phoneOf(s.chatId),
             idMessage: body.idMessage,
             text,
             timestamp: (body.timestamp ?? Math.floor(Date.now() / 1000)) * 1000,

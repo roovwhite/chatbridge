@@ -1,13 +1,13 @@
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
-import { Avatar } from '@/components/Avatar.tsx'
-import { MessageInput } from '@/components/MessageInput.tsx'
-import { MessageTicks } from '@/components/MessageTicks.tsx'
-import { useMarkChatRead } from '@/hooks/useMarkChatRead.ts'
-import { useSendMessage } from '@/hooks/useSendMessage.ts'
-import { useChatStore } from '@/store/chatStore.ts'
-import { formatTime } from '@/utils/format.ts'
+import { Avatar } from '@/components/Avatar'
+import { MessageInput } from '@/components/MessageInput'
+import { MessageTicks } from '@/components/MessageTicks'
+import { useMarkChatRead } from '@/hooks/useMarkChatRead'
+import { useSendMessage } from '@/hooks/useSendMessage'
+import { useChatStore } from '@/store/chatStore'
+import { formatTime } from '@/utils/format'
 
 import styles from './ChatWindow.module.css'
 
